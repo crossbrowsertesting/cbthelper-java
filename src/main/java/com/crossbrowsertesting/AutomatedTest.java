@@ -8,6 +8,7 @@ package com.crossbrowsertesting;
 
 
 
+import com.mashape.unirest.request.GetRequest;
 import org.apache.commons.codec.binary.Base64;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -94,9 +95,7 @@ public class AutomatedTest {
     
     public Snapshot[] getSnapshots() throws UnirestException {
         Snapshot[] snaps;
-        HttpResponse<String> response = Unirest.get(Builders.api + this.testId + "/snapshots")
-                .basicAuth(Builders.username, Builders.authkey)
-                .asString();
+        HttpResponse<String> response = doGet("/snapshots").asString();
         JSONArray results = new JSONArray(response.getBody());
         String hash;
         snaps = new Snapshot[results.length()];
@@ -118,9 +117,7 @@ public class AutomatedTest {
     
     public Video[] getVideos() throws UnirestException {
         Video[] videos;
-        HttpResponse<String> response = Unirest.get(Builders.api + this.testId + "/videos")
-                .basicAuth(Builders.username, Builders.authkey)
-                .asString();
+        HttpResponse<String> response = doGet("/videos").asString();
         JSONArray results = new JSONArray(response.getBody());
         String hash;
         videos = new Video[results.length()];
@@ -168,5 +165,17 @@ public class AutomatedTest {
             vid.saveLocally(directory+filename);
             count++;
         }
+    }
+
+    public String getWebUrl() throws UnirestException {
+        return doGet("").asJson()
+                        .getBody()
+                        .getObject()
+                        .getString("show_result_web_url");
+    }
+
+    private GetRequest doGet(String relativeUrl) {
+        return Unirest.get(Builders.api + this.testId + relativeUrl)
+                      .basicAuth(Builders.username, Builders.authkey);
     }
 }
